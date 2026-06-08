@@ -1,22 +1,35 @@
-import rclpy
-from rclpy.node import Node
+import os
+import pickle
+from code import pathfind
 
-class Perception(Node):
-
-    def __init__(self):
-        super().__init__("nrai_pathplanning")
-        self.timer = self.create_timer(1, self._timer_callback)
-
-    def _timer_callback(self):
-        self.get_logger().info("nrai_pathplanning node is running.")
+fifo_in = '/opt/PERCEPTION_ZedYoloTrack'
+fifo_out = '/opt/PATHPLANNING_Path'
 
 def main(args=None):
-    rclpy.init(args=args)
-    minimal_publisher = Perception()
-    rclpy.spin(minimal_publisher)
-    minimal_publisher.destroy_node()
-    rclpy.shutdown()
-
+    try:
+        # Make FIFO output
+        os.mkfifo(fifo_out, 0o600)
+        
+        # FIFO input
+        fd_in = os.open(fifo_in, os.O_WRONLY)
+        with open(fd_in, "wb") as file:
+            while True:
+                cones = pickle.load(file)
+                midpoints = pathfind(cones)
+                
+                try:
+                    fd_out = os.open(fifo_out, os.O_WRONLY)
+                    with open(fd_out, "wb") as fifo:
+                        pickle.dump(midpoints, fifo)
+                except FileNotFoundError:
+                    self.get_logger().info("Could not access FIFO IN. Likely not yet configured.")
+                except BrokenPipeError:
+                    self.get_logger().info("FIFO OUT terminated")
+                    
+    except FileNotFoundError:
+        self.get_logger().info("Could not access FIFO OUT. Likely not yet configured.")
+    except BrokenPipeError:
+        self.get_logger().info("FIFO IN terminated")
 
 if __name__ == "__main__":
     main()
