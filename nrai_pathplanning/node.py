@@ -2,8 +2,8 @@ import os
 import pickle
 from code import pathfind
 
-fifo_in = '/opt/PERCEPTION_ZedYoloTrack'
-fifo_out = '/opt/PATHPLANNING_Path'
+fifo_in = '/tmp/PERCEPTION_ZedYoloTrack'
+fifo_out = '/tmp/PATHPLANNING_Path'
 
 def main(args=None):
     try:
