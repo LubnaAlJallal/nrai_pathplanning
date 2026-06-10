@@ -1,5 +1,6 @@
 echo "Setting up: " $(pwd)
 python3 -m venv ./.venv/
+
 source ./.venv/bin/activate
 
 echo "Installing requirements"
