@@ -13,23 +13,24 @@ def main(args=None):
         # FIFO input
         fd_in = os.open(fifo_in, os.O_WRONLY)
         with open(fd_in, "wb") as file:
+            print(f"NRAI_PATHPLANNING: Successfully opened {fifo_in}.")
             while True:
                 cones = pickle.load(file)
-                midpoints = pathfind(cones)
+                path = pathfind(cones)
                 
                 try:
                     fd_out = os.open(fifo_out, os.O_WRONLY)
                     with open(fd_out, "wb") as fifo:
-                        pickle.dump(midpoints, fifo)
+                        pickle.dump(path, fifo)
                 except FileNotFoundError:
-                    self.get_logger().info("Could not access FIFO IN. Likely not yet configured.")
+                    print(f"NRAI_PATHPLANNING: Could not access FIFO {fifo_out}. Likely not yet configured.")
                 except BrokenPipeError:
-                    self.get_logger().info("FIFO OUT terminated")
+                    print(f"NRAI_PATHPLANNING: FIFO {fifo_out} terminated")
                     
     except FileNotFoundError:
-        self.get_logger().info("Could not access FIFO OUT. Likely not yet configured.")
+        print(f"NRAI_PATHPLANNING: Could not access FIFO {fifo_in}. Likely not yet configured.")
     except BrokenPipeError:
-        self.get_logger().info("FIFO IN terminated")
+        print(f"NRAI_PATHPLANNING: FIFO {fifo_in} terminated")
 
 if __name__ == "__main__":
     main()
